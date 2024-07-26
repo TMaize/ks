@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Print Env
+        run: |
+          env
+          echo -------
+          echo ${{ github.ref }}
+          echo -------
+          echo ${{ github.ref_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to NPM
+        run: |
+          yarn
+          npm config set registry=https://registry.npmjs.org --location project
+          npm --no-git-tag-version version ${{ github.ref_name }}
+          npm run build
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Settings -> Secrets and variables -> Actions -> Repository secrets
