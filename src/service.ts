@@ -5,7 +5,7 @@ import Router from '@koa/router'
 import { koaBody } from 'koa-body'
 import { fileURLToPath } from 'url'
 
-import { getIPAdress } from './util'
+import { getIPAdress } from './util.js'
 
 const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 

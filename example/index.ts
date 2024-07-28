@@ -1,4 +1,4 @@
-import { getDefaultService, getConfig } from '../src/index'
+import { getDefaultService, getConfig } from '../src/index.js'
 
 const config = getConfig('./example/config.yml')
 

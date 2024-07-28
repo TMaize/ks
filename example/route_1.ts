@@ -1,4 +1,4 @@
-import { getDefaultService } from '../src/index'
+import { getDefaultService } from '../src/index.js'
 
 const { router } = getDefaultService()
 

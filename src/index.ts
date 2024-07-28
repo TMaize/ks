@@ -1,3 +1,3 @@
-export { getConfig } from './config'
+export { getConfig } from './config.js'
 
-export { getService, getDefaultService, createService } from './service'
+export { getService, getDefaultService, createService } from './service.js'
