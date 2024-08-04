@@ -1,8 +1,5 @@
-name: 'hello world'
-list:
-  - 'hello'
-  - 'world'
-  - '!'
-user:
-  name: 'John'
-  age: 20
+auth:
+  secret: '123456'
+  whiteList:
+    - '/ping'
+    - '/api/login'

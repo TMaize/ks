@@ -1,11 +1,9 @@
-import { getDefaultService, getConfig } from '../src/index.js'
+import { getService, getConfig } from '../src/index.js'
 
 const config = getConfig('./example/config.yml')
 
-console.log(config)
-
-getDefaultService()
+getService()
   .cors()
-  .auth()
+  .auth(config.auth.secret, config.auth.whiteList)
   .scanRoute('./example')
   .start()

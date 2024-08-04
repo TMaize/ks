@@ -5,22 +5,35 @@ import Router from '@koa/router'
 import { koaBody } from 'koa-body'
 import { fileURLToPath } from 'url'
 
-import { getIPAdress } from './util.js'
+import { getIPAdress, jwtDecode, jwtSign } from './util.js'
 
 const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 
 const store = new Map<string, Service>()
 
 interface IConfig {
+  port: number
   cors: {
     enable: boolean
     domains: string[]
-  },
-  port: number
+  }
+  auth: {
+    enable: boolean
+    secret: string
+    whiteList: string[]
+  }
   scanRoutes: string[]
 }
 
-function startApp(app: Koa, port: number): Promise<void> {
+interface KoaState {
+  username?: string
+}
+
+interface KoaContext {
+  createToken: (username: string) => string;
+}
+
+function startApp(app: Koa<any, any>, port: number): Promise<void> {
   return new Promise((resolve, reject) => {
     app.listen(port, '0.0.0.0', () => {
       console.log('[KS]', `listen port ${port}`)
@@ -38,10 +51,9 @@ function startApp(app: Koa, port: number): Promise<void> {
 }
 
 class Service {
-
-  private app: Koa
+  private app: Koa<KoaState, KoaContext>
   private config: IConfig
-  public router: Router
+  public router: Router<KoaState, KoaContext>
 
   constructor() {
     this.app = new Koa()
@@ -49,9 +61,10 @@ class Service {
     this.router = new Router({ strict: true })
 
     this.config = {
-      cors: { enable: false, domains: [] },
-      scanRoutes: [],
       port: 8888,
+      cors: { enable: false, domains: [] },
+      auth: { enable: false, secret: '', whiteList: [] },
+      scanRoutes: [],
     }
   }
 
@@ -63,7 +76,15 @@ class Service {
     return this
   }
 
-  auth() {
+  auth(secret: string, whiteList?: string[]) {
+    if (!secret) {
+      throw new Error('secret must be set')
+    }
+    this.config.auth.enable = true
+    this.config.auth.secret = secret
+    if (Array.isArray(whiteList)) {
+      this.config.auth.whiteList = whiteList
+    }
     return this
   }
 
@@ -114,6 +135,29 @@ class Service {
       })
     }
 
+    // config auth
+    if (this.config.auth.enable) {
+      this.app.use(async (ctx, next) => {
+        const whiteList = this.config.auth.whiteList
+        const authorization = (ctx.get('Authorization') || '').replace(/^Bearer /, '')
+        const result = jwtDecode(authorization, this.config.auth.secret)
+        if (!whiteList.includes(ctx.path) && (!result || !result.username)) {
+          ctx.throw(401, 'please login')
+        }
+        ctx.state.username = result?.username
+        await next()
+      })
+    }
+    this.app.context.createToken = (username: string) => {
+      if (!this.config.auth.secret) {
+        throw new Error('createToken: auth must be init')
+      }
+      if (!username) {
+        throw new Error('createToken: username must be set')
+      }
+      return jwtSign({ username }, this.config.auth.secret)
+    }
+
     // use koa body
     this.app.use(koaBody({ multipart: true }))
 
@@ -140,20 +184,22 @@ function createService(name: string) {
   return service
 }
 
-function getService(name: string): Service {
-  const service = store.get(name)
+function getService(name?: string): Service {
+  const serviceName = name || 'default'
+
+  if (serviceName === 'default') {
+    return store.get('default') || createService('default')
+  }
+
+  const service = store.get(serviceName)
   if (!service) {
     throw new Error(`service ${name} not found`)
   }
-  return service
-}
 
-function getDefaultService() {
-  return store.get('default') || createService('default')
+  return service
 }
 
 export {
   createService,
-  getService,
-  getDefaultService
+  getService
 }
