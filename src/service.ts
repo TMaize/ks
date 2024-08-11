@@ -76,7 +76,7 @@ class Service {
     if (config.service?.cors?.enable) {
       this.config.cors.enable = true
     }
-    if (Array.isArray(config.service?.cors?.origins)) {
+    if (config.service?.cors?.origins && Array.isArray(config.service?.cors?.origins)) {
       this.config.cors.origins = config.service.cors.origins
     }
   }
