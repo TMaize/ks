@@ -1,5 +1,7 @@
-auth:
-  secret: '123456'
-  whiteList:
-    - '/ping'
-    - '/api/login'
+service:
+  port: 8888
+  cors:
+    enable: true
+
+mongo:
+  uri: 'xxx'

@@ -4,29 +4,72 @@ import path from 'path'
 
 const store = new Map<string, any>()
 
-function getConfig<T = any>(file?: string): T {
-  let files = ['./config.yml', './config.yaml']
-  if (file) {
-    files = [file]
+interface KsConfig {
+  service?: {
+    port?: number
+    cors?: {
+      enable: boolean
+      origins?: Array<string>
+    }
   }
-  let lastFile = ''
+  mongo?: {
+    uri: string
+  }
+}
+
+let ksConfig: KsConfig
+
+function getKsConfig(): KsConfig {
+  if (ksConfig) {
+    return ksConfig
+  }
+
+  let config = {}
+  let files = ['./config.yml', './config.yaml']
+  if (process.env.KS_CONFIG_FILE) {
+    files = [process.env.KS_CONFIG_FILE]
+  }
+
+  for (let i = 0; i < process.argv.length; i++) {
+    const arg = process.argv[i]
+    const result = /^--config=(.+)$/.exec(arg)
+    if (result) {
+      files = [result[1]]
+      break
+    }
+  }
+
   for (let i = 0; i < files.length; i++) {
     const file = path.resolve(files[i]);
-    lastFile = files[i]
-
-    if (store.has(file)) {
-      return store.get(file) as T
-    }
-
     if (fs.existsSync(file)) {
-      const data = YAML.parse(fs.readFileSync(file, 'utf8'))
-      store.set(file, data)
-      return data
+      console.log('[KS]', 'use config', files[i])
+      config = YAML.parse(fs.readFileSync(file, 'utf8'))
+      break
     }
   }
-  throw new Error('config file not found: ' + path.resolve(lastFile).replace(/\\/g, '/'))
+
+  ksConfig = config
+  return config
+}
+
+function getConfig<T = any>(file: string): T {
+  const filePath = path.resolve(file);
+
+  if (store.has(filePath)) {
+    return store.get(filePath) as T
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error('config file not found: ' + file)
+  }
+
+  const data = YAML.parse(fs.readFileSync(file, 'utf8'))
+  store.set(file, data)
+
+  return data
 }
 
 export {
+  getKsConfig,
   getConfig
 }

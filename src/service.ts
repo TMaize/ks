@@ -6,6 +6,7 @@ import { koaBody } from 'koa-body'
 import { fileURLToPath } from 'url'
 
 import { getIPAdress, jwtDecode, jwtSign } from './util.js'
+import { getKsConfig } from './config.js'
 
 const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 
@@ -15,14 +16,14 @@ interface IConfig {
   port: number
   cors: {
     enable: boolean
-    domains: string[]
+    origins: string[]
   }
   auth: {
     enable: boolean
     secret: string
     whiteList: string[]
   }
-  scanRoutes: string[]
+  modules: string[]
 }
 
 interface KoaState {
@@ -36,7 +37,6 @@ interface KoaContext {
 function startApp(app: Koa<any, any>, port: number): Promise<void> {
   return new Promise((resolve, reject) => {
     app.listen(port, '0.0.0.0', () => {
-      console.log('[KS]', `listen port ${port}`)
       console.log('[KS]', `access http://127.0.0.1:${port}`)
       try {
         getIPAdress().forEach(ip => {
@@ -60,18 +60,39 @@ class Service {
 
     this.router = new Router({ strict: true })
 
+    const config = getKsConfig()
+
     this.config = {
-      port: 8888,
-      cors: { enable: false, domains: [] },
+      port: 3000,
+      cors: { enable: false, origins: ['*'] },
       auth: { enable: false, secret: '', whiteList: [] },
-      scanRoutes: [],
+      modules: [],
+    }
+
+    // assign config
+    if (config.service?.port) {
+      this.config.port = config.service.port
+    }
+    if (config.service?.cors?.enable) {
+      this.config.cors.enable = true
+    }
+    if (Array.isArray(config.service?.cors?.origins)) {
+      this.config.cors.origins = config.service.cors.origins
     }
   }
 
-  cors(domains?: Array<string>) {
-    this.config.cors.enable = true
-    if (Array.isArray(domains)) {
-      this.config.cors.domains = domains
+  port(port: number) {
+    if (!port) {
+      throw new Error('port must be set')
+    }
+    this.config.port = port
+    return this
+  }
+
+  cors(enable: boolean, origins?: Array<string>) {
+    this.config.cors.enable = enable
+    if (Array.isArray(origins)) {
+      this.config.cors.origins = origins
     }
     return this
   }
@@ -88,36 +109,35 @@ class Service {
     return this
   }
 
-  scanRoute(dir: string) {
-    if (!fs.existsSync(dir)) return this
-    if (!fs.statSync(dir).isDirectory()) return this
+  module(file: string) {
+    let f = file
 
-    const names = fs.readdirSync(dir)
-    for (let i = 0; i < names.length; i++) {
-      const name = names[i]
-      if (! /^route_.+\.(ts|js)$/.test(name)) continue
-      const modulePath = path.resolve(path.join(dir, names[i])).replace(/\.(ts|js)$/, '')
-      if (!this.config.scanRoutes.includes(modulePath)) {
-        this.config.scanRoutes.push(modulePath)
-      }
+    if (!file.endsWith('.js') && fs.existsSync(file + '.js')) {
+      f = file + '.js'
+    } else if (!file.endsWith('.ts') && fs.existsSync(file + '.ts')) {
+      f = file + '.ts'
     }
-    return this
-  }
 
-  port(port: number) {
-    if (!port) {
-      throw new Error('port must be set')
+    if (!fs.existsSync(f) || !fs.statSync(f).isFile()) {
+      throw new Error(`module ${file} not found`)
     }
-    this.config.port = port
+    const modulePath = path.resolve(f).replace(/\.(ts|js)$/, '')
+    if (!this.config.modules.includes(modulePath)) {
+      this.config.modules.push(modulePath)
+    }
     return this
   }
 
   async start(): Promise<void> {
+
+    console.log('[KS]', 'service.port', JSON.stringify(this.config.port))
+
     // config cors
+    console.log('[KS]', 'service.cors', JSON.stringify(this.config.cors))
     if (this.config.cors.enable) {
       this.app.use(async (ctx, next) => {
         const origin = ctx.header.origin || ''
-        const allow = this.config.cors.domains.length == 0 || this.config.cors.domains.includes(origin)
+        const allow = this.config.cors.origins.find(item => item === '*' || item === origin)
         if (origin && allow) {
           ctx.set('Access-Control-Allow-Origin', origin)
           ctx.set('Access-Control-Allow-Credentials', 'true')
@@ -162,9 +182,9 @@ class Service {
     this.app.use(koaBody({ multipart: true }))
 
     // scan router
-    for (let i = 0; i < this.config.scanRoutes.length; i++) {
-      const modulePath = this.config.scanRoutes[i]
-      console.log('[KS]', 'scanRoute', path.relative('./', modulePath).replace(/\\/g, '/'))
+    for (let i = 0; i < this.config.modules.length; i++) {
+      const modulePath = this.config.modules[i]
+      console.log('[KS]', 'load module', path.relative('./', modulePath).replace(/\\/g, '/'))
       await import(path.relative(BASE_DIR, modulePath).replace(/\\/g, '/'))
     }
 

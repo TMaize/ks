@@ -1,4 +1,4 @@
-import { getService } from '../src/index.js'
+import { getService, getMongoClient } from '../src/index.js'
 
 const { router } = getService()
 
@@ -14,5 +14,14 @@ router.post('/api/login', async (ctx, next) => {
   ctx.body = {
     code: '200',
     token: ctx.createToken(body.username)
+  }
+})
+
+router.get('/api/db', async (ctx, next) => {
+  const db = await getMongoClient()
+
+  ctx.body = {
+    code: '200',
+    data: await db.db('test').collection('test').find().toArray()
   }
 })

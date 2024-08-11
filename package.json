@@ -7,7 +7,7 @@
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
   "scripts": {
-    "dev": "tsx watch example/index.ts",
+    "dev": "tsx watch example/index.ts --config=example/config.yml",
     "build": "rm -rf esm && tsc"
   },
   "keywords": [],
@@ -34,5 +34,8 @@
     "koa": "2.14.2",
     "koa-body": "6.0.1",
     "yaml": "^2.5.0"
+  },
+  "optionalDependencies": {
+    "mongodb": "^6.8.0"
   }
 }
