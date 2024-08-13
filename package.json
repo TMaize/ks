@@ -4,8 +4,21 @@
   "description": "koa server",
   "type": "module",
   "main": "esm/index.js",
-  "module": "esm/index.js",
   "types": "esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./esm/index.d.ts",
+      "import": "./esm/index.js"
+    },
+    "./service": {
+      "types": "./esm/service.d.ts",
+      "import": "./esm/service.js"
+    },
+    "./mongo": {
+      "types": "./esm/mongo.d.ts",
+      "import": "./esm/mongo.js"
+    }
+  },
   "scripts": {
     "dev": "tsx watch example/index.ts --config=example/config.yml",
     "build": "rm -rf esm && tsc"
