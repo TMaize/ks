@@ -13,13 +13,14 @@ interface KsConfig {
     }
   }
   mongo?: {
-    uri: string
+    url: string
+    defaultDb: string
   }
 }
 
 let ksConfig: KsConfig
 
-function getKsConfig(): KsConfig {
+function getConfig(): KsConfig {
   if (ksConfig) {
     return ksConfig
   }
@@ -52,24 +53,6 @@ function getKsConfig(): KsConfig {
   return config
 }
 
-function getConfig<T = any>(file: string): T {
-  const filePath = path.resolve(file);
-
-  if (store.has(filePath)) {
-    return store.get(filePath) as T
-  }
-
-  if (!fs.existsSync(filePath)) {
-    throw new Error('config file not found: ' + file)
-  }
-
-  const data = YAML.parse(fs.readFileSync(file, 'utf8'))
-  store.set(file, data)
-
-  return data
-}
-
 export {
-  getKsConfig,
-  getConfig
+  getConfig,
 }

@@ -1,6 +1,6 @@
-import { MongoClient, ServerApiVersion } from 'mongodb'
+import { MongoClient, Db, DbOptions } from 'mongodb'
 
-import { getKsConfig } from './config.js'
+import { getConfig } from './config.js'
 
 let client: null | Promise<MongoClient> = null
 
@@ -9,22 +9,16 @@ function getMongoClient(): Promise<MongoClient> {
     return client
   }
 
-  const config = getKsConfig()
+  const config = getConfig()
 
   client = new Promise<MongoClient>(async (resolve, reject) => {
 
-    if (!config.mongo || !config.mongo.uri) {
-      reject(new Error('MongoDB URI not found in config'))
+    if (!config.mongo || !config.mongo.url) {
+      reject(new Error('MongoDB URL not found in config'))
       return
     }
 
-    const client = new MongoClient(config.mongo.uri, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true
-      }
-    })
+    const client = new MongoClient(config.mongo.url)
     try {
       await client.connect()
       resolve(client)
@@ -36,6 +30,13 @@ function getMongoClient(): Promise<MongoClient> {
   return client
 }
 
+function getMongoDb(dbName?: string, options?: DbOptions): Promise<Db> {
+  const config = getConfig()
+  const db = dbName || config.mongo?.defaultDb
+  return getMongoClient().then(client => client.db(db, options))
+}
+
 export {
-  getMongoClient
+  getMongoClient,
+  getMongoDb
 }

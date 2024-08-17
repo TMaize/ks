@@ -6,7 +6,7 @@ import { koaBody } from 'koa-body'
 import { fileURLToPath } from 'url'
 
 import { getIPAdress, jwtDecode, jwtSign } from './util.js'
-import { getKsConfig } from './config.js'
+import { getConfig } from './config.js'
 
 const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 
@@ -60,7 +60,7 @@ class Service {
 
     this.router = new Router({ strict: true })
 
-    const config = getKsConfig()
+    const config = getConfig()
 
     this.config = {
       port: 3000,
