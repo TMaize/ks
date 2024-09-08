@@ -155,6 +155,18 @@ class Service {
       })
     }
 
+    // error wrap
+    this.app.use(async (ctx, next) => {
+      try {
+        await next()
+      } catch (err: any) {
+        const message = err?.message || err?.toString() || 'unknown error'
+        const status = err?.status || 500
+        ctx.status = status
+        ctx.body = { code: status, message }
+      }
+    })
+
     // config auth
     if (this.config.auth.enable) {
       this.app.use(async (ctx, next) => {

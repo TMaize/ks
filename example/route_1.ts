@@ -7,7 +7,7 @@ router.get('/ping', async (ctx, next) => {
 })
 
 router.post('/api/login', async (ctx, next) => {
-  const body = ctx.request.body
+  const body = ctx.request.body || {}
   if (!body.username) {
     ctx.throw(400, 'username is required')
   }
@@ -24,4 +24,8 @@ router.get('/api/db', async (ctx, next) => {
     code: '200',
     data: await db.db('test').collection('test').find().toArray()
   }
+})
+
+router.post('/api/error', async (ctx, next) => {
+  throw new Error('test error')
 })
