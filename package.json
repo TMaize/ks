@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "description": "koa server",
   "type": "module",
-  "main": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "main": "esm/service.js",
+  "types": "esm/service.d.ts",
   "exports": {
-    ".": {
-      "types": "./esm/index.d.ts",
-      "import": "./esm/index.js"
-    },
     "./config": {
       "types": "./esm/config.d.ts",
       "import": "./esm/config.js"
+    },
+    "./util": {
+      "types": "./esm/util.d.ts",
+      "import": "./esm/util.js"
     },
     "./service": {
       "types": "./esm/service.d.ts",

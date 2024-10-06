@@ -1,5 +1,6 @@
 import os from 'os'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 
 function getIPAdress(): string[] {
   const result: string[] = []
@@ -35,8 +36,13 @@ function jwtDecode(token: string, secret: string) {
   }
 }
 
+function md5(str: string) {
+  return crypto.createHash('md5').update(str).digest('hex')
+}
+
 export {
   getIPAdress,
   jwtSign,
-  jwtDecode
+  jwtDecode,
+  md5
 }

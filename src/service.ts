@@ -180,6 +180,7 @@ class Service {
     })
 
     // config auth
+    console.log('[KS]', 'service.auth', JSON.stringify(this.config.auth))
     if (this.config.auth.enable) {
       this.app.use(async (ctx, next) => {
         const whiteList = this.config.auth.whiteList
