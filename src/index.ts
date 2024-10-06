@@ -1,5 +1,3 @@
-export { getConfig } from './config.js'
+export { }
 
-export { getService, createService } from './service.js'
-
-export { getMongoClient, getMongoDb } from './mongo.js'
+export default {}

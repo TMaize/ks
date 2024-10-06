@@ -10,6 +10,10 @@
       "types": "./esm/index.d.ts",
       "import": "./esm/index.js"
     },
+    "./config": {
+      "types": "./esm/config.d.ts",
+      "import": "./esm/config.js"
+    },
     "./service": {
       "types": "./esm/service.d.ts",
       "import": "./esm/service.js"

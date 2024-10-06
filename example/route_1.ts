@@ -1,4 +1,5 @@
-import { getService, getMongoClient } from '../src/index.js'
+import { getService } from '../src/service.js'
+import { getMongoClient } from '../src/mongo.js'
 
 const { router } = getService()
 
@@ -27,5 +28,6 @@ router.get('/api/db', async (ctx, next) => {
 })
 
 router.post('/api/error', async (ctx, next) => {
+  ctx.request.body
   throw new Error('test error')
 })

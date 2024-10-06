@@ -2,8 +2,6 @@ import YAML from 'yaml'
 import fs from 'fs'
 import path from 'path'
 
-const store = new Map<string, any>()
-
 interface KsConfig {
   service?: {
     port?: number
@@ -11,11 +9,17 @@ interface KsConfig {
       enable: boolean
       origins?: Array<string>
     }
+    auth?: {
+      enable: boolean
+      secret: string
+      whiteList?: Array<string>
+    }
   }
   mongo?: {
     url: string
     defaultDb: string
   }
+  [key: string]: any
 }
 
 let ksConfig: KsConfig

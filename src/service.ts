@@ -69,15 +69,28 @@ class Service {
       modules: [],
     }
 
-    // assign config
+    // assign port
     if (config.service?.port) {
       this.config.port = config.service.port
     }
+
+    // assign cors
     if (config.service?.cors?.enable) {
       this.config.cors.enable = true
     }
-    if (config.service?.cors?.origins && Array.isArray(config.service?.cors?.origins)) {
-      this.config.cors.origins = config.service.cors.origins
+    if (Array.isArray(config.service?.cors?.origins)) {
+      this.config.cors.origins = config.service!.cors!.origins
+    }
+
+    // assign auth
+    if (config.service?.auth?.enable) {
+      this.config.auth.enable = true
+    }
+    if (config.service?.auth?.secret) {
+      this.config.auth.secret = config.service.auth.secret
+    }
+    if (Array.isArray(config.service?.auth?.whiteList)) {
+      this.config.auth.whiteList = config.service!.auth!.whiteList
     }
   }
 
@@ -97,12 +110,11 @@ class Service {
     return this
   }
 
-  auth(secret: string, whiteList?: string[]) {
-    if (!secret) {
-      throw new Error('secret must be set')
+  auth(enable: boolean, secret?: string, whiteList?: string[]) {
+    this.config.auth.enable = enable
+    if (secret) {
+      this.config.auth.secret = secret
     }
-    this.config.auth.enable = true
-    this.config.auth.secret = secret
     if (Array.isArray(whiteList)) {
       this.config.auth.whiteList = whiteList
     }
@@ -232,6 +244,8 @@ function getService(name?: string): Service {
 }
 
 export {
+  Router as koaRouter,
+  koaBody,
   createService,
   getService
 }

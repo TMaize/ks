@@ -1,4 +1,5 @@
-import { getService, getMongoDb } from '../src/index.js'
+import { getService } from '../src/service.js'
+import { getMongoDb } from '../src/mongo.js'
 
 getService()
   .module('./example/route_1')
