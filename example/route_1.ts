@@ -31,3 +31,7 @@ router.post('/api/error', async (ctx, next) => {
   ctx.request.body
   throw new Error('test error')
 })
+
+router.get('/api/auth', async (ctx, next) => {
+  ctx.body = { code: '200' }
+})

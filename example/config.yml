@@ -2,6 +2,13 @@ service:
   port: 8888
   cors:
     enable: true
+  auth:
+    enable: true
+    secret: '123'
+    whiteList:
+      - '/ping'
+      - '/api/login'
+      - '/api/error'
 
 mongo:
   url: 'mongodb://admin:123456@127.0.0.1:27017'

@@ -186,10 +186,11 @@ class Service {
         const whiteList = this.config.auth.whiteList
         const authorization = (ctx.get('Authorization') || '').replace(/^Bearer /, '')
         const result = jwtDecode(authorization, this.config.auth.secret)
-        if (!whiteList.includes(ctx.path) && (!result || !result.username)) {
+        const username = result?.username || result?.sub
+        if (!whiteList.includes(ctx.path) && !username) {
           ctx.throw(401, 'please login')
         }
-        ctx.state.username = result?.username
+        ctx.state.username = username
         await next()
       })
     }
