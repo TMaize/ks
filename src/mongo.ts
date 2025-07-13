@@ -2,41 +2,70 @@ import { MongoClient, Db, DbOptions } from 'mongodb'
 
 import { getConfig } from './config.js'
 
-let client: null | Promise<MongoClient> = null
-
-function getMongoClient(): Promise<MongoClient> {
-  if (client) {
-    return client
-  }
-
-  const config = getConfig()
-
-  client = new Promise<MongoClient>(async (resolve, reject) => {
-
-    if (!config.mongo || !config.mongo.url) {
-      reject(new Error('MongoDB URL not found in config'))
-      return
-    }
-
-    const client = new MongoClient(config.mongo.url)
-    try {
-      await client.connect()
-      resolve(client)
-    } catch (err) {
-      reject(err)
-    }
-  })
-
-  return client
+interface IState {
+  client: null | Promise<MongoClient>
 }
 
-function getMongoDb(dbName?: string, options?: DbOptions): Promise<Db> {
+const state: IState = {
+  client: null
+}
+
+function getMongoClient(): Promise<MongoClient> {
+  if (!state.client) {
+    const config = getConfig()
+    state.client = new Promise<MongoClient>((resolve, reject) => {
+      if (!config.mongo || !config.mongo.url) {
+        reject(new Error('MongoDB URL not found in config'))
+        return
+      }
+      const client = new MongoClient(config.mongo.url)
+      client.connect().then(resolve).catch(reject)
+    })
+  }
+
+  return state.client
+}
+
+function getMongoDb(options?: DbOptions): Promise<Db> {
   const config = getConfig()
-  const db = dbName || config.mongo?.defaultDb
+  const db = config.mongo?.defaultDb
+  if (!db) {
+    throw new Error('MongoDB defaultDb not found in config')
+  }
   return getMongoClient().then(client => client.db(db, options))
+}
+
+async function withTempMongoClient<T = void>(callback: (c: MongoClient) => Promise<T>): Promise<T> {
+  let client: MongoClient | null = null
+  try {
+    const config = getConfig()
+    if (!config.mongo || !config.mongo.url) {
+      throw new Error('MongoDB URL not found in config')
+    }
+    client = new MongoClient(config.mongo.url)
+    await client.connect()
+    return await callback(client)
+  } finally {
+    if (client) {
+      client.close().catch(() => { })
+    }
+  }
+}
+
+async function withTempMongoDb<T = void>(callback: (db: Db) => Promise<T>): Promise<T> {
+  return withTempMongoClient<T>(async (client) => {
+    const config = getConfig()
+    const db = config.mongo?.defaultDb
+    if (!db) {
+      throw new Error('MongoDB defaultDb not found in config')
+    }
+    return await callback(client.db(db))
+  })
 }
 
 export {
   getMongoClient,
-  getMongoDb
+  getMongoDb,
+  withTempMongoClient,
+  withTempMongoDb
 }
