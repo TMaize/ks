@@ -2,34 +2,45 @@
   "name": "@tmaize/ks",
   "version": "0.0.0",
   "description": "koa server",
-  "type": "module",
-  "main": "esm/service.js",
-  "types": "esm/service.d.ts",
+  "main": "./lib/index.js",
+  "types": "./esm/index.d.ts",
   "exports": {
+    ".": {
+      "types": "./esm/index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./lib/index.js"
+    },
     "./config": {
       "types": "./esm/config.d.ts",
-      "import": "./esm/config.js"
+      "import": "./esm/config.js",
+      "require": "./lib/config.js"
     },
     "./util": {
       "types": "./esm/util.d.ts",
-      "import": "./esm/util.js"
+      "import": "./esm/util.js",
+      "require": "./lib/util.js"
     },
     "./service": {
       "types": "./esm/service.d.ts",
-      "import": "./esm/service.js"
+      "import": "./esm/service.js",
+      "require": "./lib/service.js"
     },
     "./mongo": {
       "types": "./esm/mongo.d.ts",
-      "import": "./esm/mongo.js"
+      "import": "./esm/mongo.js",
+      "require": "./lib/mongo.js"
     }
   },
   "scripts": {
     "dev": "tsx watch example/index.ts --config=example/config.yml",
-    "build": "rm -rf esm && tsc"
+    "build": "npm run build:esm && npm run build:commonjs",
+    "build:esm": "rm -rf esm && tsc",
+    "build:commonjs": "rm -rf lib && tsc --outDir lib --module commonjs"
   },
   "keywords": [],
   "files": [
     "esm",
+    "lib",
     "README.md"
   ],
   "engines": {

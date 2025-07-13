@@ -1,14 +1,11 @@
 import Koa from 'koa'
 import path from 'path'
-import fs from 'fs'
 import Router from '@koa/router'
 import { koaBody } from 'koa-body'
-import { fileURLToPath } from 'url'
-
 import { getIPAdress, jwtDecode, jwtSign } from './util.js'
 import { getConfig } from './config.js'
 
-const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
+// const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 
 const store = new Map<string, Service>()
 
@@ -121,24 +118,24 @@ class Service {
     return this
   }
 
-  module(file: string) {
-    let f = file
+  // module(file: string) {
+  //   let f = file
 
-    if (!file.endsWith('.js') && fs.existsSync(file + '.js')) {
-      f = file + '.js'
-    } else if (!file.endsWith('.ts') && fs.existsSync(file + '.ts')) {
-      f = file + '.ts'
-    }
+  //   if (!file.endsWith('.js') && fs.existsSync(file + '.js')) {
+  //     f = file + '.js'
+  //   } else if (!file.endsWith('.ts') && fs.existsSync(file + '.ts')) {
+  //     f = file + '.ts'
+  //   }
 
-    if (!fs.existsSync(f) || !fs.statSync(f).isFile()) {
-      throw new Error(`module ${file} not found`)
-    }
-    const modulePath = path.resolve(f).replace(/\.(ts|js)$/, '')
-    if (!this.config.modules.includes(modulePath)) {
-      this.config.modules.push(modulePath)
-    }
-    return this
-  }
+  //   if (!fs.existsSync(f) || !fs.statSync(f).isFile()) {
+  //     throw new Error(`module ${file} not found`)
+  //   }
+  //   const modulePath = path.resolve(f).replace(/\.(ts|js)$/, '')
+  //   if (!this.config.modules.includes(modulePath)) {
+  //     this.config.modules.push(modulePath)
+  //   }
+  //   return this
+  // }
 
   async start(): Promise<void> {
 
@@ -208,11 +205,11 @@ class Service {
     this.app.use(koaBody({ multipart: true }))
 
     // scan router
-    for (let i = 0; i < this.config.modules.length; i++) {
-      const modulePath = this.config.modules[i]
-      console.log('[KS]', 'load module', path.relative('./', modulePath).replace(/\\/g, '/'))
-      await import(path.relative(BASE_DIR, modulePath).replace(/\\/g, '/'))
-    }
+    // for (let i = 0; i < this.config.modules.length; i++) {
+    //   const modulePath = this.config.modules[i]
+    //   console.log('[KS]', 'load module', path.relative('./', modulePath).replace(/\\/g, '/'))
+    //   await import(path.relative(BASE_DIR, modulePath).replace(/\\/g, '/'))
+    // }
 
     // register router
     this.app.use(this.router.routes())
