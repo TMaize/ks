@@ -1,4 +1,4 @@
-import { getService } from '../src/service.js'
+import { getService } from '../src/index.js'
 import { getMongoClient } from '../src/mongo.js'
 
 const { router } = getService()

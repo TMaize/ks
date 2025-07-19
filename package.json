@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "koa server",
   "main": "./lib/index.js",
+  "module": "./esm/index.js",
   "types": "./esm/index.d.ts",
   "exports": {
     ".": {
@@ -19,11 +20,6 @@
       "types": "./esm/util.d.ts",
       "import": "./esm/util.js",
       "require": "./lib/util.js"
-    },
-    "./service": {
-      "types": "./esm/service.d.ts",
-      "import": "./esm/service.js",
-      "require": "./lib/service.js"
     },
     "./mongo": {
       "types": "./esm/mongo.d.ts",
@@ -62,6 +58,7 @@
     "jsonwebtoken": "^9.0.2",
     "koa": "2.14.2",
     "koa-body": "6.0.1",
+    "raw-body": "^2.3.3",
     "yaml": "^2.5.0"
   },
   "peerDependenciesMeta": {

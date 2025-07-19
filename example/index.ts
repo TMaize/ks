@@ -1,4 +1,4 @@
-import { getService } from '../src/service.js'
+import { getService } from '../src/index.js'
 import { getMongoDb } from '../src/mongo.js'
 import './route_1.js'
 
