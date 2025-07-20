@@ -25,7 +25,12 @@ class EventEmitter {
       this.sysEvent[name] = true
       process.on(name, async () => {
         console.log('\n[KS]', 'Shutting down gracefully...')
+        const timer = setTimeout(() => {
+          console.log('[KS]', 'Shutting down timeout\n')
+          process.exit(0)
+        }, 3600);
         await this.emit(name)
+        clearTimeout(timer)
         console.log('[KS]', 'Shutting down finish\n')
         process.exit(0)
       })
