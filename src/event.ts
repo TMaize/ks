@@ -1,6 +1,6 @@
 class EventEmitter {
   private events: Record<string, any[]> = {}
-  private sysEvent: Record<string, boolean> = {}
+  private sysEvent: Record<string, { count: number }> = {}
 
   constructor() {
     // 全局错误处理
@@ -22,8 +22,15 @@ class EventEmitter {
     }
 
     if (name === 'SIGINT' && !this.sysEvent[name]) {
-      this.sysEvent[name] = true
+      this.sysEvent[name] = { count: 0 }
       process.on(name, async () => {
+        this.sysEvent[name].count++
+
+        if (this.sysEvent[name].count > 1) {
+          console.log('[KS]', 'Shutting down forced\n')
+          process.exit(0)
+        }
+
         console.log('\n[KS]', 'Shutting down gracefully...')
         const timer = setTimeout(() => {
           console.log('[KS]', 'Shutting down timeout\n')

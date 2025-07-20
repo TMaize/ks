@@ -7,8 +7,6 @@ import { getConfig } from './config.js'
 import { IncomingMessage, Server } from 'node:http'
 import event from './event.js'
 
-// const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
-
 const store = new Map<string, Service>()
 
 interface IConfig {
@@ -125,25 +123,6 @@ class Service {
     return this
   }
 
-  // module(file: string) {
-  //   let f = file
-
-  //   if (!file.endsWith('.js') && fs.existsSync(file + '.js')) {
-  //     f = file + '.js'
-  //   } else if (!file.endsWith('.ts') && fs.existsSync(file + '.ts')) {
-  //     f = file + '.ts'
-  //   }
-
-  //   if (!fs.existsSync(f) || !fs.statSync(f).isFile()) {
-  //     throw new Error(`module ${file} not found`)
-  //   }
-  //   const modulePath = path.resolve(f).replace(/\.(ts|js)$/, '')
-  //   if (!this.config.modules.includes(modulePath)) {
-  //     this.config.modules.push(modulePath)
-  //   }
-  //   return this
-  // }
-
   async start(): Promise<void> {
 
     console.log('[KS]', 'service.port', JSON.stringify(this.config.port))
@@ -212,6 +191,7 @@ class Service {
     this.app.use(koaBody({ multipart: true }))
 
     // scan router
+    // const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
     // for (let i = 0; i < this.config.modules.length; i++) {
     //   const modulePath = this.config.modules[i]
     //   console.log('[KS]', 'load module', path.relative('./', modulePath).replace(/\\/g, '/'))
