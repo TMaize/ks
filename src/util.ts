@@ -30,8 +30,8 @@ function jwtSign(payload: any, secret: string): Promise<string> {
 function jwtDecode<T = any>(token: string, secret: string): Promise<T | null> {
   const secretKey = new TextEncoder().encode(secret);
   return jwtVerify(token, secretKey).then(resp => {
-    return resp.payload as T
-  }).catch(err => null)
+    return resp.payload as unknown as T
+  }).catch(() => null)
 }
 
 function md5(str: string) {
