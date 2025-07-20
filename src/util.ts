@@ -1,6 +1,6 @@
-import os from 'os'
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
+import os from 'node:os'
+import { SignJWT, jwtVerify } from 'jose'
+import crypto from 'node:crypto'
 
 function getIPAdress(): string[] {
   const result: string[] = []
@@ -18,22 +18,20 @@ function getIPAdress(): string[] {
   return result
 }
 
-function jwtSign(payload: any, secret: string) {
-  return jwt.sign(payload, secret, {
-    algorithm: 'HS256',
-    expiresIn: '1d'
-  })
+function jwtSign(payload: any, secret: string): Promise<string> {
+  const secretKey = new TextEncoder().encode(secret);
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('1d')
+    .sign(secretKey);
 }
 
-function jwtDecode(token: string, secret: string) {
-  try {
-    const payload = jwt.verify(token, secret) as any
-    // delete payload.exp
-    // delete payload.iat
-    return payload
-  } catch (error) {
-    return null
-  }
+function jwtDecode<T = any>(token: string, secret: string): Promise<T | null> {
+  const secretKey = new TextEncoder().encode(secret);
+  return jwtVerify(token, secretKey).then(resp => {
+    return resp.payload as T
+  }).catch(err => null)
 }
 
 function md5(str: string) {

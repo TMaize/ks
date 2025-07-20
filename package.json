@@ -11,6 +11,11 @@
       "import": "./esm/index.js",
       "require": "./lib/index.js"
     },
+    "./event": {
+      "types": "./esm/event.d.ts",
+      "import": "./esm/event.js",
+      "require": "./lib/event.js"
+    },
     "./config": {
       "types": "./esm/config.d.ts",
       "import": "./esm/config.js",
@@ -46,7 +51,6 @@
   "author": "TMaize <1772314831@qq.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "16.18.3",
     "mongodb": "^6.8.0",
     "typescript": "4.7.4"
@@ -55,7 +59,7 @@
     "@koa/router": "12.0.1",
     "@types/koa": "2.13.12",
     "@types/koa__router": "12.0.4",
-    "jsonwebtoken": "^9.0.2",
+    "jose": "5.10.0",
     "koa": "2.14.2",
     "koa-body": "6.0.1",
     "raw-body": "^2.3.3",

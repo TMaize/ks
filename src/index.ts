@@ -4,7 +4,8 @@ import { koaBody } from 'koa-body'
 import rawBody from 'raw-body'
 import { getIPAdress, jwtDecode, jwtSign } from './util.js'
 import { getConfig } from './config.js'
-import { IncomingMessage } from 'http'
+import { IncomingMessage, Server } from 'node:http'
+import event from './event.js'
 
 // const BASE_DIR = path.dirname(fileURLToPath(import.meta.url))
 
@@ -29,22 +30,27 @@ interface KoaState {
 }
 
 interface KoaContext {
-  createToken: (username: string) => string;
+  createToken: (username: string) => Promise<string>;
 }
 
 function startApp(app: Koa<any, any>, port: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    app.listen(port, '0.0.0.0', () => {
-      console.log('[KS]', `access http://127.0.0.1:${port}`)
-      try {
-        getIPAdress().forEach(ip => {
-          console.log('[KS]', `access http://${ip}:${port}`)
+
+  return new Promise<Server>((resolve, reject) => {
+    const server = app.listen(port, '0.0.0.0', () => resolve(server)).on('error', reject);
+  }).then(server => {
+    console.log('[KS]', `access http://127.0.0.1:${port}`)
+    getIPAdress().forEach(ip => {
+      console.log('[KS]', `access http://${ip}:${port}`)
+    })
+
+    event.on('SIGINT', () => {
+      return new Promise<void>((resolve, reject) => {
+        console.log('[KS]', 'close server')
+        server.close(err => {
+          err ? reject(err) : resolve()
         })
-      } catch (error) {
-        // ignore
-      }
-      resolve()
-    }).on('error', reject)
+      })
+    })
   })
 }
 
@@ -183,7 +189,7 @@ class Service {
       this.app.use(async (ctx, next) => {
         const whiteList = this.config.auth.whiteList
         const authorization = (ctx.get('Authorization') || '').replace(/^Bearer /, '')
-        const result = jwtDecode(authorization, this.config.auth.secret)
+        const result = await jwtDecode(authorization, this.config.auth.secret)
         const username = result?.username || result?.sub
         if (!whiteList.includes(ctx.path) && !username) {
           ctx.throw(401, 'please login')

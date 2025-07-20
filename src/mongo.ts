@@ -1,6 +1,6 @@
 import { MongoClient, Db, DbOptions } from 'mongodb'
-
 import { getConfig } from './config.js'
+import event from './event.js'
 
 interface IState {
   client: null | Promise<MongoClient>
@@ -18,8 +18,17 @@ function getMongoClient(): Promise<MongoClient> {
         reject(new Error('MongoDB URL not found in config'))
         return
       }
-      const client = new MongoClient(config.mongo.url)
-      client.connect().then(resolve).catch(reject)
+      const client = new MongoClient(config.mongo.url, { serverSelectionTimeoutMS: 6000 })
+      client.connect().then(() => {
+        event.on('SIGINT', () => {
+          console.log('[KS]', 'close mongo')
+          return client.close()
+        })
+        resolve(client)
+      }).catch(err => {
+        state.client = null
+        reject(err)
+      })
     })
   }
 
